@@ -1,150 +1,196 @@
 variable "org_id" {
+  type        = string
   description = "GCP Organization ID"
-  type        = string
-  default     = ""
 }
 
-variable "billing_account" {
-  description = "The ID of the billing account to associate projects with."
+variable "folder_id" {
   type        = string
-}
-
-variable "group_org_admins" {
-  description = "Google Group for GCP Organization Administrators"
-  type        = string
-}
-
-variable "group_billing_admins" {
-  description = "Google Group for GCP Billing Administrators"
-  type        = string
-}
-
-variable "default_region" {
-  description = "Default region to create resources where applicable."
-  type        = string
-  default     = "us-central1"
+  default     = null
+  description = "The ID of a folder to host this project"
 }
 
 variable "parent_folder" {
-  description = "Optional - for an organization with existing projects or for development/validation. It will place all the example foundation resources under the provided folder instead of the root organization. The value is the numeric folder ID. The folder must already exist."
   type        = string
   default     = ""
+  description = "GCP parent folder ID in the form folders/{id}"
 }
 
-variable "org_project_creators" {
-  description = "Additional list of members to have project creator role across the organization. Prefix of group: user: or serviceAccount: is required."
+variable "default_region" {
+  type        = string
+  description = "Default region to create resources where applicable."
+}
+
+variable "enable_random_suffix" {
+  type        = bool
+  default     = true
+  description = "Appends a 4 character random suffix to project ID and GCS bucket name."
+}
+
+variable "billing_account" {
+  type        = string
+  description = "The ID of the billing account to associate projects with."
+}
+
+
+variable "group_billing_admins" {
+  type        = string
+  description = "Google Group for GCP Billing Administrators"
+}
+
+variable "extra_org_project_creators" {
   type        = list(string)
   default     = []
+  description = "Additional list of members to have project creator role accross the organization. Prefix of group: user: or serviceAccount: is required."
 }
 
-variable "org_policy_admin_role" {
-  description = "Additional Org Policy Admin role for admin group. You can use this for testing purposes."
+
+variable "sa_enable_impersonation" {
   type        = bool
   default     = false
+  description = "Allow org_admins group to impersonate service account & enable APIs required."
 }
 
-variable "project_prefix" {
-  description = "Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters."
-  type        = string
-  default     = "prj"
+
+variable "activate_seed_apis" {
+  type        = list(string)
+  description = "List of APIs to enable in the seed project."
 }
 
-variable "folder_prefix" {
-  description = "Name prefix to use for folders created. Should be the same in all steps."
+
+variable "seed_project_id" {
   type        = string
-  default     = "fldr"
+  default     = ""
+  description = "Custom project ID to use for project created. If not supplied, the default id is {project_prefix}-seed-{random suffix}."
 }
 
-variable "bucket_prefix" {
-  description = "Name prefix to use for state bucket created."
+variable "seed_project_prefix" {
   type        = string
-  default     = "bkt"
+  default     = null
+  description = "Name prefix to use for projects created."
+}
+
+variable "state_bucket_name" {
+  type        = string
+  default     = ""
+  description = "Custom state bucket name. If not supplied, the default name is {project_prefix}-tfstate-{random suffix}."
+}
+
+variable "encrypt_gcs_bucket_tfstate" {
+  type        = bool
+  default     = false
+  description = "Encrypt bucket used for storing terraform state files in seed project."
+}
+
+variable "enable_force_destroy" {
+  type        = bool
+  default     = false
+  description = "If supplied, the state bucket will be deleted even while containing objects."
+}
+
+
+variable "tf_service_account_id" {
+  type        = string
+  default     = "org-terraform"
+  description = "ID of service account for terraform in seed project"
+}
+
+variable "tf_service_account_name" {
+  type        = string
+  default     = "Organization Terraform Account"
+  description = "Display name of service account for terraform in seed project"
+}
+
+
+variable "storage_bucket_labels" {
+  type        = map(string)
+  default     = {}
+  description = "Labels to apply to the storage bucket."
+}
+
+
+variable "seed_project_labels" {
+  type        = map(string)
+  default     = {}
+  description = "Labels to apply to the project."
+}
+
+variable "activate_build_apis" {
+  type        = list(string)
+  default     = []
+  description = "List of APIs to enable in the Cloudbuild project."
 }
 
 variable "cloud_source_repos" {
-  description = "List of Cloud Source Repositories created during bootstrap project build stage for use with Cloud Build."
   type        = list(string)
-  default     = ["gcp-org", "gcp-environments", "gcp-networks", "gcp-projects"]
+  default     = []
+  description = "List of Cloud Source Repos to create with CloudBuild triggers."
 }
 
-/* ----------------------------------------
-    Specific to jenkins_bootstrap module
-   ---------------------------------------- */
+variable "cloudbuild_apply_filename" {
+  type        = string
+  default     = "cloudbuild-tf-apply.yaml"
+  description = "Path and name of Cloud Build YAML definition used for terraform apply."
+}
 
-# # Un-comment the jenkins_bootstrap module and its outputs if you want to use Jenkins instead of Cloud Build
-# variable "jenkins_agent_gce_subnetwork_cidr_range" {
-#  description = "The subnetwork to which the Jenkins Agent will be connected to (in CIDR range 0.0.0.0/0)"
-#  type        = string
-# }
+variable "cloudbuild_plan_filename" {
+  type        = string
+  default     = "cloudbuild-tf-plan.yaml"
+  description = "cloudbuild-tf-plan.yaml"
+}
 
-# variable "jenkins_agent_gce_private_ip_address" {
-#  description = "The private IP Address of the Jenkins Agent. This IP Address must be in the CIDR range of `jenkins_agent_gce_subnetwork_cidr_range` and be reachable through the VPN that exists between on-prem (Jenkins Master) and GCP (CICD Project, where the Jenkins Agent is located)."
-#  type        = string
-# }
+variable "create_cloud_source_repos" {
+  type        = bool
+  default     = true
+  description = "If shared Cloud Source Repos should be created.If shared Cloud Source Repos should be created."
+}
 
-# variable "jenkins_agent_gce_ssh_pub_key" {
-#  description = "SSH public key needed by the Jenkins Agent GCE Instance. The Jenkins Master holds the SSH private key. The correct format is `'ssh-rsa [KEY_VALUE] [USERNAME]'`"
-#  type        = string
-# }
+variable "gar_repo_name" {
+  type        = string
+  default     = ""
+  description = "Custom name to use for GAR repo."
+}
 
-# variable "jenkins_agent_sa_email" {
-#  description = "Email for Jenkins Agent service account."
-#  type        = string
-#  default     = "jenkins-agent-gce"
-# }
+variable "gcloud_version" {
+  type        = string
+  default     = ""
+  description = "Default gcloud image version."
+}
 
-# variable "jenkins_master_subnetwork_cidr_range" {
-#  description = "A list of CIDR IP ranges of the Jenkins Master in the form ['0.0.0.0/0']. Usually only one IP in the form '0.0.0.0/32'. Needed to create a FW rule that allows communication with the Jenkins Agent GCE Instance."
-#  type        = list(string)
-# }
+variable "group_org_admins" {
+  type        = string
+  default     = ""
+  description = "Google Group for GCP Organization Administrators"
+}
 
-# variable "nat_bgp_asn" {
-#  type        = number
-#  description = "BGP ASN for NAT cloud route. This is needed to allow the Jenkins Agent to download packages and updates from the internet without having an external IP address."
-# }
+variable "build_project_id" {
+  type        = string
+  default     = ""
+  description = "Custom project ID to use for project created. If not supplied, the default id is {project_prefix}-seed-{random suffix}."
+}
 
-# variable "vpn_shared_secret" {
-#   description = "The shared secret used in the VPN"
-#   type        = string
-# }
+variable "build_project_prefix" {
+  type        = string
+  default     = null
+  description = "Name prefix to use for projects created."
+}
 
-# variable "on_prem_vpn_public_ip_address" {
-#   description = "The public IP Address of the Jenkins Master."
-#   type        = string
-# }
+variable "build_project_labels" {
+  type        = map(string)
+  default     = {}
+  description = "Labels to apply to the project."
+}
 
-# variable "on_prem_vpn_public_ip_address2" {
-#   description = "The second public IP Address of the Jenkins Master."
-#   type        = string
-# }
-
-# variable "router_asn" {
-#   type        = number
-#   description = "BGP ASN for cloud routes."
-#   default     = "64515"
-# }
-
-# variable "bgp_peer_asn" {
-#   type        = number
-#   description = "BGP ASN for cloud routes."
-# }
-
-# variable "tunnel0_bgp_peer_address" {
-#   type        = string
-#   description = "BGP session address for tunnel 0"
-# }
-
-# variable "tunnel0_bgp_session_range" {
-#   type        = string
-#   description = "BGP session range for tunnel 0"
-# }
-
-# variable "tunnel1_bgp_peer_address" {
-#   type        = string
-#   description = "BGP session address for tunnel 1"
-# }
-
-# variable "tunnel1_bgp_session_range" {
-#   type        = string
-#   description = "BGP session range for tunnel 1"
-# }
+variable "zimagi_projects" {
+  type = map(string)
+  default = {
+    production = {
+      name = "prod"
+      activate_apis = []
+    }
+    development = {
+      name = "dev"
+      activate_apis = []
+    }
+  }
+  description = "Zimagi Projects"
+}

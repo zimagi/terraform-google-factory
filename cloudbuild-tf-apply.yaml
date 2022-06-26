@@ -1,0 +1,28 @@
+timeout: 1200s
+steps:
+# terraform init -input=false
+- name: gcr.io/$PROJECT_ID/terraform
+  args:
+  - init
+  - -input=false
+# terraform validate
+- name: gcr.io/$PROJECT_ID/terraform
+  args:
+  - validate
+# terraform plan -input=false -out=tfplan
+- name: gcr.io/$PROJECT_ID/terraform
+  args:
+  - plan
+  - -input=false
+  - -out=tfplan
+# terraform apply -auto-approve -input=false tfplan
+- name: gcr.io/$PROJECT_ID/terraform
+  args:
+  - apply
+  - -auto-approve
+  - -input=false
+  - tfplan
+artifacts:
+  objects:
+    location: 'gs://${_ARTIFACT_BUCKET_NAME}/terraform/cloudbuild/apply/$BUILD_ID'
+    paths: ['cloudbuild-tf-apply.yaml', 'tfplan']

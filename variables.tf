@@ -63,7 +63,7 @@ variable "seed_project_id" {
   description = "Custom project ID to use for project created. If not supplied, the default id is {project_prefix}-seed-{random suffix}."
 }
 
-variable "seed_project_prefix" {
+variable "project_prefix" {
   type        = string
   default     = null
   description = "Name prefix to use for projects created."
@@ -162,16 +162,14 @@ variable "group_org_admins" {
   description = "Google Group for GCP Organization Administrators"
 }
 
+variable "users_folder_admin" {
+  type = list(string)
+}
+
 variable "build_project_id" {
   type        = string
   default     = ""
   description = "Custom project ID to use for project created. If not supplied, the default id is {project_prefix}-seed-{random suffix}."
-}
-
-variable "build_project_prefix" {
-  type        = string
-  default     = null
-  description = "Name prefix to use for projects created."
 }
 
 variable "build_project_labels" {
@@ -181,7 +179,7 @@ variable "build_project_labels" {
 }
 
 variable "zimagi_projects" {
-  type = map(string)
+  # type = map(string)
   default = {
     production = {
       name = "prod"

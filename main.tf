@@ -4,8 +4,7 @@ provider "google" {}
 provider "google-beta" {}
 
 module "bootstrap_seed" {
-  source  = "terraform-google-modules/bootstrap/google"
-  version = "6.0.0"
+  source  = "./modules/terraform-google-bootstrap-project"
 
   org_id         = var.org_id
   folder_id      = var.folder_id
@@ -22,7 +21,7 @@ module "bootstrap_seed" {
   activate_apis = var.activate_seed_apis
 
   project_id     = var.seed_project_id
-  project_prefix = var.seed_project_prefix
+  project_prefix = var.project_prefix
 
   state_bucket_name          = var.state_bucket_name
   encrypt_gcs_bucket_tfstate = var.encrypt_gcs_bucket_tfstate
@@ -37,14 +36,13 @@ module "bootstrap_seed" {
 }
 
 module "bootstrap_build" {
-  source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild"
-  version = "6.0.0"
+  source  = "./modules/terraform-google-bootstrap-cloudbuild"
 
   org_id                  = var.org_id
   folder_id               = var.folder_id
   sa_enable_impersonation = true
   billing_account         = var.billing_account
-  group_org_admins        = var.group_org_admins
+  # group_org_admins        = var.group_org_admins
   random_suffix           = var.enable_random_suffix
   default_region          = var.default_region
   gcloud_version          = var.gcloud_version
@@ -59,7 +57,7 @@ module "bootstrap_build" {
   cloudbuild_plan_filename  = var.cloudbuild_plan_filename
 
   project_id     = var.build_project_id
-  project_prefix = var.build_project_prefix
+  project_prefix = var.project_prefix
 
   terraform_sa_email     = module.bootstrap_seed.terraform_sa_email
   terraform_sa_name      = module.bootstrap_seed.terraform_sa_name
@@ -70,7 +68,7 @@ module "project_zimagi" {
   source  = "terraform-google-modules/project-factory/google"
   version = "13.0.0"
 
-  for_each = zimagi_projects
+  for_each = var.zimagi_projects
 
   name                        = "${var.project_prefix}-zimagi-${each.value.name}"
   random_project_id           = var.enable_random_suffix

@@ -174,3 +174,12 @@ variable "kms_prevent_destroy" {
   description = "Set the prevent_destroy lifecycle attribute on keys."
   default     = true
 }
+
+variable "enable_cross_project_service_account_usage" {
+  type = bool
+  default = false 
+}
+
+variable "org_users_org_iam_permissions" {
+  default = {}
+}

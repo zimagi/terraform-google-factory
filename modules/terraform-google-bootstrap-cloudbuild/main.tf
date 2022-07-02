@@ -151,7 +151,7 @@ resource "google_cloudbuild_trigger" "main_trigger" {
     _TF_ACTION            = "apply"
   }
 
-  filename = var.cloudbuild_apply_filename
+  # filename = var.cloudbuild_apply_filename
   depends_on = [
     google_sourcerepo_repository.gcp_repo,
     # google_service_account_iam_member.org_admin_terraform_sa_impersonate,
@@ -201,24 +201,24 @@ resource "google_artifact_registry_repository" "tf-image-repo" {
   format        = "DOCKER"
 }
 
-resource "null_resource" "cloudbuild_terraform_builder" {
-  triggers = {
-    project_id_cloudbuild_project = module.cloudbuild_project.project_id
-    terraform_version_sha256sum   = var.terraform_version_sha256sum
-    terraform_version             = var.terraform_version
-    gar_name                      = local.gar_name
-    gar_location                  = google_artifact_registry_repository.tf-image-repo.location
-  }
+# resource "null_resource" "cloudbuild_terraform_builder" {
+#   triggers = {
+#     project_id_cloudbuild_project = module.cloudbuild_project.project_id
+#     terraform_version_sha256sum   = var.terraform_version_sha256sum
+#     terraform_version             = var.terraform_version
+#     gar_name                      = local.gar_name
+#     gar_location                  = google_artifact_registry_repository.tf-image-repo.location
+#   }
 
-  provisioner "local-exec" {
-    command = <<EOT
-    gcloud ${local.impersonate_service_account} builds submit ${path.module}/cloudbuild_builder/ --project ${module.cloudbuild_project.project_id} --config=${path.module}/cloudbuild_builder/cloudbuild.yaml --substitutions=_GCLOUD_VERSION=${var.gcloud_version},_TERRAFORM_VERSION=${var.terraform_version},_TERRAFORM_VERSION_SHA256SUM=${var.terraform_version_sha256sum},_REGION=${google_artifact_registry_repository.tf-image-repo.location},_REPOSITORY=${local.gar_name}
-  EOT
-  }
-  depends_on = [
-    google_artifact_registry_repository_iam_member.terraform-image-iam
-  ]
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#     gcloud ${local.impersonate_service_account} builds submit ${path.module}/cloudbuild_builder/ --project ${module.cloudbuild_project.project_id} --config=${path.module}/cloudbuild_builder/cloudbuild.yaml --substitutions=_GCLOUD_VERSION=${var.gcloud_version},_TERRAFORM_VERSION=${var.terraform_version},_TERRAFORM_VERSION_SHA256SUM=${var.terraform_version_sha256sum},_REGION=${google_artifact_registry_repository.tf-image-repo.location},_REPOSITORY=${local.gar_name}
+#   EOT
+#   }
+#   depends_on = [
+#     google_artifact_registry_repository_iam_member.terraform-image-iam
+#   ]
+# }
 
 resource "google_storage_bucket_iam_member" "cloudbuild_artifacts_iam" {
   bucket = google_storage_bucket.cloudbuild_artifacts.name

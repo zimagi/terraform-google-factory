@@ -99,7 +99,7 @@ variable "state_bucket_name" {
 variable "grant_billing_user" {
   description = "Grant roles/billing.user role to CFT service account"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "storage_bucket_labels" {

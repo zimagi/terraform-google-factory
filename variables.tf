@@ -197,3 +197,7 @@ variable "zimagi_projects" {
   }
   description = "Zimagi Projects"
 }
+
+variable "users_org_admins" {
+  default = []
+}

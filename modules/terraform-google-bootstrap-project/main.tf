@@ -170,11 +170,11 @@ resource "google_service_account_iam_member" "org_admin_sa_impersonate_permissio
 }
 
 resource "google_folder_iam_member" "org_admin_serviceusage_consumer" {
-  count = var.sa_enable_impersonation
+  for_each = toset(var.users_org_admins)
 
   folder  = var.folder_id
   role    = "roles/serviceusage.serviceUsageConsumer"
-  members = var.users_org_admins
+  member  = each.value
 }
 
 resource "google_folder_iam_member" "org_admin_service_account_user" {

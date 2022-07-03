@@ -51,17 +51,14 @@ module "bootstrap_seed" {
 
   sa_org_iam_permissions = [
     "roles/accesscontextmanager.policyAdmin",
-    "roles/billing.user",
     "roles/compute.networkAdmin",
     "roles/compute.xpnAdmin",
     "roles/iam.securityAdmin",
     "roles/iam.serviceAccountAdmin",
     "roles/logging.configWriter",
-    "roles/orgpolicy.policyAdmin",
     "roles/resourcemanager.projectCreator",
     "roles/resourcemanager.folderAdmin",
     "roles/securitycenter.notificationConfigEditor",
-    "roles/resourcemanager.organizationViewer"
   ]
 
   project_id     = var.seed_project_id
@@ -170,7 +167,7 @@ resource "google_folder_iam_member" "folder_cb_sa_browser" {
 # }
 
 module "zimagi_projects" {
-  for_each = var.zimagi_projects
+  for_each                    = var.zimagi_projects
   source                      = "terraform-google-modules/project-factory/google"
   version                     = "13.0.0"
   name                        = each.key

@@ -99,7 +99,7 @@ resource "google_storage_bucket" "org_terraform_state" {
   }
 }
 
-resource "google_organization_iam_binding" "project_creator" {
+resource "google_folder_iam_binding" "project_creator" {
   count   = local.is_organization ? 1 : 0
   org_id  = local.parent_id
   role    = "roles/resourcemanager.projectCreator"
@@ -113,7 +113,7 @@ resource "google_folder_iam_binding" "project_creator" {
   members = local.org_project_creators
 }
 
-# resource "google_organization_iam_member" "org_admins_group" {
+# resource "google_folder_iam_member" "org_admins_group" {
 #   for_each = toset(var.org_admins_org_iam_permissions)
 #   org_id   = var.org_id
 #   role     = each.value
@@ -140,10 +140,10 @@ resource "google_folder_iam_binding" "project_creator" {
 #   member = "group:${var.group_billing_admins}"
 # }
 
-resource "google_organization_iam_member" "tf_sa_org_perms" {
+resource "google_folder_iam_member" "tf_sa_org_perms" {
   for_each = toset(var.sa_org_iam_permissions)
 
-  org_id = var.org_id
+  folder = var.folder_id
   role   = each.value
   member = "serviceAccount:${google_service_account.org_terraform.email}"
 }
@@ -177,13 +177,13 @@ resource "google_service_account_iam_member" "org_admin_sa_impersonate_permissio
   member            = each.value
 }
 
-# resource "google_organization_iam_member" "org_admin_serviceusage_consumer" {
-#   count = var.sa_enable_impersonation && local.is_organization ? 1 : 0
+resource "google_folder_iam_member" "org_admin_serviceusage_consumer" {
+  count = var.sa_enable_impersonation
 
-#   org_id  = local.parent_id
-#   role    = "roles/serviceusage.serviceUsageConsumer"
-#   members = var.users_org_admins
-# }
+  folder  = var.folder_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  members = var.users_org_admins
+}
 
 resource "google_folder_iam_member" "org_admin_service_account_user" {
   for_each = toset(var.users_org_admins)

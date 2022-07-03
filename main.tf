@@ -49,22 +49,20 @@ module "bootstrap_seed" {
     "billingbudgets.googleapis.com"
   ]
 
-  # sa_org_iam_permissions = [
-  #   "roles/accesscontextmanager.policyAdmin",
-  #   "roles/billing.user",
-  #   "roles/compute.networkAdmin",
-  #   "roles/compute.xpnAdmin",
-  #   "roles/iam.securityAdmin",
-  #   "roles/iam.serviceAccountAdmin",
-  #   "roles/logging.configWriter",
-  #   "roles/orgpolicy.policyAdmin",
-  #   "roles/resourcemanager.projectCreator",
-  #   "roles/resourcemanager.folderAdmin",
-  #   "roles/securitycenter.notificationConfigEditor",
-  #   "roles/resourcemanager.organizationViewer"
+  sa_org_iam_permissions = [
+    "roles/accesscontextmanager.policyAdmin",
+    "roles/billing.user",
+    "roles/compute.networkAdmin",
+    "roles/compute.xpnAdmin",
+    "roles/iam.securityAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/logging.configWriter",
+    "roles/orgpolicy.policyAdmin",
+    "roles/resourcemanager.projectCreator",
+    "roles/resourcemanager.folderAdmin",
+    "roles/securitycenter.notificationConfigEditor",
+    "roles/resourcemanager.organizationViewer"
   ]
-
-  sa_org_iam_permissions = []
 
   project_id     = var.seed_project_id
   project_prefix = var.project_prefix
@@ -131,27 +129,19 @@ data "google_project" "cloudbuild" {
   depends_on = [module.bootstrap_build.csr_repos]
 }
 
-# resource "google_organization_iam_member" "org_cb_sa_iam_viewer" {
-#   org_id = var.org_id
-#   role   = "roles/iam.securityReviewer"
-#   member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
-# }
+resource "google_folder_iam_member" "org_cb_sa_iam_viewer" {
+  folder = var.folder_id
+  role   = "roles/iam.securityReviewer"
+  member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
+}
 
-# resource "google_organization_iam_member" "org_cb_sa_browser" {
-#   count  = var.parent_folder == "" ? 1 : 0
-#   org_id = var.org_id
-#   role   = "roles/browser"
-#   member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
-# }
+resource "google_folder_iam_member" "folder_cb_sa_browser" {
+  folder = var.folder_id
+  role   = "roles/browser"
+  member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
+}
 
-# resource "google_folder_iam_member" "folder_cb_sa_browser" {
-#   count  = var.parent_folder != "" ? 1 : 0
-#   folder = var.parent_folder
-#   role   = "roles/browser"
-#   member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
-# }
-
-# resource "google_organization_iam_member" "org_tf_compute_security_policy_admin" {
+# resource "google_folders_iam_member" "org_tf_compute_security_policy_admin" {
 #   count  = var.parent_folder == "" ? 1 : 0
 #   org_id = var.org_id
 #   role   = "roles/compute.orgSecurityPolicyAdmin"
@@ -165,7 +155,7 @@ data "google_project" "cloudbuild" {
 #   member = "serviceAccount:${module.bootstrap_seed.terraform_sa_email}"
 # }
 
-# resource "google_organization_iam_member" "org_tf_compute_security_resource_admin" {
+# resource "hashicorp/terraform:light_iam_member" "org_tf_compute_security_resource_admin" {
 #   count  = var.parent_folder == "" ? 1 : 0
 #   org_id = var.org_id
 #   role   = "roles/compute.orgSecurityResourceAdmin"

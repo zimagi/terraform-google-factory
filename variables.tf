@@ -35,6 +35,7 @@ variable "billing_account" {
 variable "group_billing_admins" {
   type        = string
   description = "Google Group for GCP Billing Administrators"
+  default     = ""
 }
 
 variable "extra_org_project_creators" {
@@ -54,6 +55,7 @@ variable "sa_enable_impersonation" {
 variable "activate_seed_apis" {
   type        = list(string)
   description = "List of APIs to enable in the seed project."
+  default     = []
 }
 
 
@@ -163,7 +165,8 @@ variable "group_org_admins" {
 }
 
 variable "users_folder_admin" {
-  type = list(string)
+  default = []
+  type    = list(string)
 }
 
 variable "build_project_id" {
@@ -182,11 +185,11 @@ variable "zimagi_projects" {
   # type = map(string)
   default = {
     production = {
-      name = "prod"
+      name          = "prod"
       activate_apis = []
     }
     development = {
-      name = "dev"
+      name          = "dev"
       activate_apis = []
     }
   }

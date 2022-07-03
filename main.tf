@@ -182,11 +182,11 @@ module "zimagi_projects" {
   source                      = "terraform-google-modules/project-factory/google"
   version                     = "13.0.0"
   name                        = each.key
-  random_project_id           = var.random_suffix
+  random_project_id           = var.enable_random_suffix
   disable_services_on_destroy = false
   folder_id                   = var.folder_id
   org_id                      = var.org_id
   billing_account             = var.billing_account
   activate_apis               = each.value.activate_apis
-  labels                      = var.project_labels
+  labels                      = each.value.project_labels
 }

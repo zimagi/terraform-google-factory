@@ -187,10 +187,12 @@ variable "zimagi_projects" {
     production = {
       name          = "prod"
       activate_apis = []
+      project_labels = {}
     }
     development = {
       name          = "dev"
       activate_apis = []
+      project_labels = {}
     }
   }
   description = "Zimagi Projects"

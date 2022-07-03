@@ -100,15 +100,7 @@ resource "google_storage_bucket" "org_terraform_state" {
 }
 
 resource "google_folder_iam_binding" "project_creator" {
-  count   = local.is_organization ? 1 : 0
-  org_id  = local.parent_id
-  role    = "roles/resourcemanager.projectCreator"
-  members = local.org_project_creators
-}
-
-resource "google_folder_iam_binding" "project_creator" {
-  count   = local.is_organization ? 0 : 1
-  folder  = local.parent_id
+  folder  = var.folder_id
   role    = "roles/resourcemanager.projectCreator"
   members = local.org_project_creators
 }

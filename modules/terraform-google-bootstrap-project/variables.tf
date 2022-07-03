@@ -176,10 +176,15 @@ variable "kms_prevent_destroy" {
 }
 
 variable "enable_cross_project_service_account_usage" {
-  type = bool
-  default = false 
+  type    = bool
+  default = false
 }
 
 variable "org_users_org_iam_permissions" {
   default = {}
+}
+
+variable "users_org_admins" {
+  type = list(string)
+
 }

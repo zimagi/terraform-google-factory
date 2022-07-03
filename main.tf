@@ -3,22 +3,66 @@ provider "google" {}
 
 provider "google-beta" {}
 
-module "bootstrap_seed" {
-  source  = "./modules/terraform-google-bootstrap-project"
+locals {
+  parent = var.parent_folder != "" ? "folders/${var.parent_folder}" : "organizations/${var.org_id}"
+  # org_admins_org_iam_permissions = var.org_policy_admin_role == true ? [
+  #   "roles/orgpolicy.policyAdmin", "roles/resourcemanager.organizationAdmin", "roles/billing.user"
+  # ] : ["roles/resourcemanager.organizationAdmin", "roles/billing.user"]
+}
 
-  org_id         = var.org_id
-  folder_id      = var.folder_id
-  parent_folder  = var.parent_folder
+module "bootstrap_seed" {
+  source = "./modules/terraform-google-bootstrap-project"
+
+  org_id    = var.org_id
+  folder_id = var.folder_id
+  # parent_folder  = var.parent_folder
   default_region = var.default_region
   random_suffix  = var.enable_random_suffix
+  parent_folder  = var.parent_folder == "" ? "" : local.parent
 
   billing_account         = var.billing_account
   group_org_admins        = var.group_org_admins
   group_billing_admins    = var.group_billing_admins
+  users_org_admins        = ["user:erik.jagyugya@dccs.tech"]
   org_project_creators    = var.extra_org_project_creators
   sa_enable_impersonation = var.sa_enable_impersonation
 
-  activate_apis = var.activate_seed_apis
+  activate_apis = [
+    "serviceusage.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "cloudkms.googleapis.com",
+    "compute.googleapis.com",
+    "logging.googleapis.com",
+    "bigquery.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "iam.googleapis.com",
+    "admin.googleapis.com",
+    "appengine.googleapis.com",
+    "storage-api.googleapis.com",
+    "monitoring.googleapis.com",
+    "pubsub.googleapis.com",
+    "securitycenter.googleapis.com",
+    "accesscontextmanager.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "billingbudgets.googleapis.com"
+  ]
+
+  sa_org_iam_permissions = [
+    "roles/accesscontextmanager.policyAdmin",
+    "roles/billing.user",
+    "roles/compute.networkAdmin",
+    "roles/compute.xpnAdmin",
+    "roles/iam.securityAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/logging.configWriter",
+    "roles/orgpolicy.policyAdmin",
+    "roles/resourcemanager.projectCreator",
+    "roles/resourcemanager.folderAdmin",
+    "roles/securitycenter.notificationConfigEditor",
+    "roles/resourcemanager.organizationViewer"
+  ]
 
   project_id     = var.seed_project_id
   project_prefix = var.project_prefix
@@ -36,17 +80,31 @@ module "bootstrap_seed" {
 }
 
 module "bootstrap_build" {
-  source  = "./modules/terraform-google-bootstrap-cloudbuild"
+  source = "./modules/terraform-google-bootstrap-cloudbuild"
 
   org_id                  = var.org_id
   folder_id               = var.folder_id
   sa_enable_impersonation = true
   billing_account         = var.billing_account
   # group_org_admins        = var.group_org_admins
-  random_suffix           = var.enable_random_suffix
-  default_region          = var.default_region
-  gcloud_version          = var.gcloud_version
-  activate_apis           = var.activate_build_apis
+  random_suffix  = var.enable_random_suffix
+  default_region = var.default_region
+  gcloud_version = var.gcloud_version
+  activate_apis = [
+    "serviceusage.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "compute.googleapis.com",
+    "logging.googleapis.com",
+    "bigquery.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "iam.googleapis.com",
+    "admin.googleapis.com",
+    "appengine.googleapis.com",
+    "storage-api.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "billingbudgets.googleapis.com"
+  ]
 
 
   cloud_source_repos        = var.cloud_source_repos
@@ -62,22 +120,59 @@ module "bootstrap_build" {
   terraform_sa_email     = module.bootstrap_seed.terraform_sa_email
   terraform_sa_name      = module.bootstrap_seed.terraform_sa_name
   terraform_state_bucket = module.bootstrap_seed.gcs_bucket_tfstate
+
 }
 
-module "project_zimagi" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "13.0.0"
+data "google_project" "cloudbuild" {
+  project_id = module.bootstrap_build.cloudbuild_project_id
 
-  for_each = var.zimagi_projects
+  depends_on = [module.bootstrap_build.csr_repos]
+}
 
-  name                        = "${var.project_prefix}-zimagi-${each.value.name}"
-  random_project_id           = var.enable_random_suffix
-  org_id                      = var.org_id
-  billing_account             = var.billing_account
-  auto_create_network         = false
-  default_service_account     = "deprivilege"
-  disable_services_on_destroy = false
-  folder_id                   = var.folder_id
+resource "google_organization_iam_member" "org_cb_sa_iam_viewer" {
+  org_id = var.org_id
+  role   = "roles/iam.securityReviewer"
+  member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
+}
 
-  activate_apis = each.value.activate_apis
+resource "google_organization_iam_member" "org_cb_sa_browser" {
+  count  = var.parent_folder == "" ? 1 : 0
+  org_id = var.org_id
+  role   = "roles/browser"
+  member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_folder_iam_member" "folder_cb_sa_browser" {
+  count  = var.parent_folder != "" ? 1 : 0
+  folder = var.parent_folder
+  role   = "roles/browser"
+  member = "serviceAccount:${data.google_project.cloudbuild.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "org_tf_compute_security_policy_admin" {
+  count  = var.parent_folder == "" ? 1 : 0
+  org_id = var.org_id
+  role   = "roles/compute.orgSecurityPolicyAdmin"
+  member = "serviceAccount:${module.bootstrap_seed.terraform_sa_email}"
+}
+
+resource "google_folder_iam_member" "folder_tf_compute_security_policy_admin" {
+  count  = var.parent_folder != "" ? 1 : 0
+  folder = var.parent_folder
+  role   = "roles/compute.orgSecurityPolicyAdmin"
+  member = "serviceAccount:${module.bootstrap_seed.terraform_sa_email}"
+}
+
+resource "google_organization_iam_member" "org_tf_compute_security_resource_admin" {
+  count  = var.parent_folder == "" ? 1 : 0
+  org_id = var.org_id
+  role   = "roles/compute.orgSecurityResourceAdmin"
+  member = "serviceAccount:${module.bootstrap_seed.terraform_sa_email}"
+}
+
+resource "google_folder_iam_member" "folder_tf_compute_security_resource_admin" {
+  count  = var.parent_folder != "" ? 1 : 0
+  folder = var.parent_folder
+  role   = "roles/compute.orgSecurityResourceAdmin"
+  member = "serviceAccount:${module.bootstrap_seed.terraform_sa_email}"
 }

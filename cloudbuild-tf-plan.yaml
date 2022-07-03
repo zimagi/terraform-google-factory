@@ -1,16 +1,16 @@
 timeout: 1200s
 steps:
 # terraform init -input=false
-- name: gcr.io/$PROJECT_ID/terraform
+- name: hashicorp/terraform:light
   args:
   - init
   - -input=false
 # terraform validate
-- name: gcr.io/$PROJECT_ID/terraform
+- name: hashicorp/terraform:light
   args:
   - validate
 # terraform plan -input=false -out=tfplan
-- name: gcr.io/$PROJECT_ID/terraform
+- name: hashicorp/terraform:light
   args:
   - plan
   - -input=false

@@ -185,13 +185,13 @@ variable "zimagi_projects" {
   # type = map(string)
   default = {
     production = {
-      name          = "prod"
-      activate_apis = []
+      name           = "prod"
+      activate_apis  = []
       project_labels = {}
     }
     development = {
-      name          = "dev"
-      activate_apis = []
+      name           = "dev"
+      activate_apis  = []
       project_labels = {}
     }
   }

@@ -4,7 +4,6 @@ locals {
   cloudbuild_apis             = ["cloudbuild.googleapis.com", "sourcerepo.googleapis.com", "cloudkms.googleapis.com", "artifactregistry.googleapis.com"]
   impersonation_enabled_count = var.sa_enable_impersonation == true ? 1 : 0
   activate_apis               = distinct(concat(var.activate_apis, local.cloudbuild_apis))
-  apply_branches_regex        = "^(${join("|", var.terraform_apply_branches)})$"
   gar_name                    = split("/", google_artifact_registry_repository.tf-image-repo.name)[length(split("/", google_artifact_registry_repository.tf-image-repo.name)) - 1]
   impersonate_service_account = var.impersonate_service_account != "" ? "--impersonate-service-account=${var.impersonate_service_account}" : ""
 }
@@ -131,11 +130,11 @@ resource "google_sourcerepo_repository" "gcp_repo" {
 resource "google_cloudbuild_trigger" "main_trigger" {
   for_each        = var.create_cloud_source_repos ? toset(var.cloud_source_repos) : []
   project         = module.cloudbuild_project.project_id
-  description     = "${each.value} - terraform apply."
+  description     = "${each.value} - production terraform apply."
   service_account = var.terraform_sa_name
 
   trigger_template {
-    branch_name = local.apply_branches_regex
+    branch_name = "main"
     repo_name   = each.value
   }
 
@@ -159,15 +158,14 @@ resource "google_cloudbuild_trigger" "main_trigger" {
   ]
 }
 
-resource "google_cloudbuild_trigger" "non_main_trigger" {
+resource "google_cloudbuild_trigger" "develop_trigger" {
   for_each        = var.create_cloud_source_repos ? toset(var.cloud_source_repos) : []
   project         = module.cloudbuild_project.project_id
-  description     = "${each.value} - terraform plan."
+  description     = "${each.value} - develop terraform apply."
   service_account = var.terraform_sa_name
 
   trigger_template {
-    invert_regex = true
-    branch_name  = local.apply_branches_regex
+    branch_name  = "develop"
     repo_name    = each.value
   }
 
@@ -180,7 +178,7 @@ resource "google_cloudbuild_trigger" "non_main_trigger" {
     _STATE_BUCKET_NAME    = var.terraform_state_bucket
     _ARTIFACT_BUCKET_NAME = google_storage_bucket.cloudbuild_artifacts.name
     _LOGS_BUCKET_NAME     = google_storage_bucket.cloudbuild_logs.name
-    _TF_ACTION            = "plan"
+    _TF_ACTION            = "apply"
   }
 
   filename = var.cloudbuild_plan_filename

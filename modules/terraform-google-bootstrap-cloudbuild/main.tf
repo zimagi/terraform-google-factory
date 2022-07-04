@@ -181,7 +181,7 @@ resource "google_cloudbuild_trigger" "develop_trigger" {
     _TF_ACTION            = "apply"
   }
 
-  filename = var.cloudbuild_plan_filename
+  filename = var.cloudbuild_apply_filename
   depends_on = [
     google_sourcerepo_repository.gcp_repo,
     # google_service_account_iam_member.org_admin_terraform_sa_impersonate,

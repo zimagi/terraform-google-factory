@@ -58,6 +58,7 @@ module "bootstrap_seed" {
     "roles/logging.configWriter",
     "roles/resourcemanager.projectCreator",
     "roles/resourcemanager.folderAdmin",
+    "roles/source.reader",
     "roles/securitycenter.notificationConfigEditor",
   ]
 

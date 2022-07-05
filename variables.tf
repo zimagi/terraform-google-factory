@@ -186,12 +186,16 @@ variable "zimagi_projects" {
   default = {
     production = {
       name           = "prod"
-      activate_apis  = []
+      activate_apis  = [
+        "container.googleapis.com"
+      ]
       project_labels = {}
     }
     development = {
       name           = "dev"
-      activate_apis  = []
+      activate_apis  = [
+        "container.googleapis.com"
+      ]
       project_labels = {}
     }
   }

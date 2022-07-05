@@ -59,6 +59,9 @@ module "bootstrap_seed" {
     "roles/resourcemanager.projectCreator",
     "roles/resourcemanager.folderAdmin",
     "roles/source.reader",
+    "roles/container.admin",
+    "roles/container.clusterAdmin",
+    "roles/container.hostServiceAgentUser",
     "roles/securitycenter.notificationConfigEditor",
   ]
 

@@ -54,7 +54,6 @@ module "bootstrap_seed" {
     "roles/compute.networkAdmin",
     "roles/compute.xpnAdmin",
     "roles/iam.securityAdmin",
-    "roles/iam.serviceAccountAdmin",
     "roles/logging.configWriter",
     "roles/resourcemanager.projectCreator",
     "roles/resourcemanager.folderAdmin",

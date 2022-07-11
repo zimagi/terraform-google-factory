@@ -28,3 +28,4 @@ artifacts:
   objects:
     location: 'gs://${_ARTIFACT_BUCKET_NAME}/terraform/cloudbuild/apply/$BUILD_ID'
     paths: ['cloudbuild-tf-apply.yaml', 'tfplan']
+  logging: CLOUD_LOGGING_ONLY

@@ -187,14 +187,20 @@ variable "zimagi_projects" {
     production = {
       name           = "prod"
       activate_apis  = [
-        "container.googleapis.com"
+        "container.googleapis.com",
+        "servicenetworking.googleapis.com",
+        "cloudbuild.googleapis.com",
+        "compute.googleapis.com"
       ]
       project_labels = {}
     }
     development = {
       name           = "dev"
       activate_apis  = [
-        "container.googleapis.com"
+        "container.googleapis.com",
+        "servicenetworking.googleapis.com",
+        "cloudbuild.googleapis.com",
+        "compute.googleapis.com"
       ]
       project_labels = {}
     }
@@ -204,4 +210,8 @@ variable "zimagi_projects" {
 
 variable "users_org_admins" {
   default = []
+}
+
+variable "pool_name" {
+  
 }

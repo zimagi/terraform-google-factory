@@ -29,6 +29,17 @@ module "cloudbuild_project" {
   labels                      = var.project_labels
 }
 
+module "enable_cross_project_service_account_usage" {
+  source  = "terraform-google-modules/org-policy/google"
+  version = "~> 5.1"
+
+  project_id  = module.cloudbuild_project.project_id
+  policy_for  = "project"
+  policy_type = "boolean"
+  enforce     = "false"
+  constraint  = "constraints/iam.disableCrossProjectServiceAccountUsage"
+}
+
 resource "google_project_iam_member" "terraform_sa_log_writer" {
   project = module.cloudbuild_project.project_id
   role    = "roles/logging.logWriter"

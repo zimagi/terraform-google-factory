@@ -172,7 +172,7 @@ module "zimagi_projects" {
   for_each                    = var.zimagi_projects
   source                      = "terraform-google-modules/project-factory/google"
   version                     = "13.0.0"
-  name                        = each.key
+  name                        = "${var.project_prefix}-${each.name}"
   random_project_id           = var.enable_random_suffix
   disable_services_on_destroy = false
   folder_id                   = var.folder_id

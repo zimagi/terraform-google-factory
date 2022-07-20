@@ -185,7 +185,7 @@ variable "zimagi_projects" {
   # type = map(string)
   default = {
     production = {
-      name           = "prod"
+      name           = "production"
       activate_apis  = [
         "container.googleapis.com",
         "servicenetworking.googleapis.com",
@@ -195,7 +195,7 @@ variable "zimagi_projects" {
       project_labels = {}
     }
     development = {
-      name           = "dev"
+      name           = "development"
       activate_apis  = [
         "container.googleapis.com",
         "servicenetworking.googleapis.com",

@@ -172,7 +172,7 @@ variable "key_rotation_period" {
 
 variable "kms_prevent_destroy" {
   description = "Set the prevent_destroy lifecycle attribute on keys."
-  default     = true
+  default     = false
 }
 
 variable "enable_cross_project_service_account_usage" {

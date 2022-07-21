@@ -30,6 +30,7 @@ module "cloudbuild_project" {
 }
 
 module "enable_cross_project_service_account_usage" {
+  count   = var.enable_cross_project_service_account_usage ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 5.1"
 

@@ -166,3 +166,8 @@ variable "impersonate_service_account" {
   type        = string
   default     = ""
 }
+
+variable "enable_cross_project_service_account_usage" {
+  type    = bool
+  default = true
+}

@@ -8,19 +8,21 @@ locals {
 module "bootstrap_seed" {
   source = "./modules/terraform-google-bootstrap-project"
 
-  org_id    = var.org_id
-  folder_id = var.folder_id
-  # parent_folder  = var.parent_folder
+  org_id        = var.org_id
+  folder_id     = var.folder_id
+  parent_folder = var.parent_folder == "" ? "" : local.parent
+
   default_region = var.default_region
   random_suffix  = var.enable_random_suffix
-  parent_folder  = var.parent_folder == "" ? "" : local.parent
 
-  billing_account         = var.billing_account
-  group_org_admins        = var.group_org_admins
-  group_billing_admins    = var.group_billing_admins
-  users_org_admins        = var.users_org_admins
-  org_project_creators    = var.extra_org_project_creators
-  sa_enable_impersonation = var.sa_enable_impersonation
+  billing_account                            = var.billing_account
+  group_org_admins                           = var.group_org_admins
+  group_billing_admins                       = var.group_billing_admins
+  users_org_admins                           = var.users_org_admins
+  org_project_creators                       = var.extra_org_project_creators
+
+  sa_enable_impersonation                    = var.sa_enable_impersonation
+  enable_cross_project_service_account_usage = var.enable_cross_project_service_account_usage
 
   activate_apis = [
     "serviceusage.googleapis.com",
@@ -81,14 +83,18 @@ module "bootstrap_seed" {
 module "bootstrap_build" {
   source = "./modules/terraform-google-bootstrap-cloudbuild"
 
-  org_id                  = var.org_id
-  folder_id               = var.folder_id
-  sa_enable_impersonation = true
-  billing_account         = var.billing_account
-  # group_org_admins        = var.group_org_admins
+  org_id              = var.org_id
+  folder_id           = var.folder_id
+  billing_account     = var.billing_account
+  # group_org_admins  = var.group_org_admins
+
+  sa_enable_impersonation                    = var.sa_enable_impersonation
+  enable_cross_project_service_account_usage = var.enable_cross_project_service_account_usage
+
   random_suffix  = var.enable_random_suffix
   default_region = var.default_region
   gcloud_version = var.gcloud_version
+
   activate_apis = [
     "serviceusage.googleapis.com",
     "servicenetworking.googleapis.com",
@@ -104,7 +110,6 @@ module "bootstrap_build" {
     "iamcredentials.googleapis.com",
     "billingbudgets.googleapis.com"
   ]
-
 
   cloud_source_repos        = var.cloud_source_repos
   create_cloud_source_repos = var.create_cloud_source_repos

@@ -102,6 +102,11 @@ variable "tf_service_account_name" {
   description = "Display name of service account for terraform in seed project"
 }
 
+variable "enable_cross_project_service_account_usage" {
+  type    = bool
+  default = true
+}
+
 
 variable "storage_bucket_labels" {
   type        = map(string)
@@ -213,5 +218,5 @@ variable "users_org_admins" {
 }
 
 variable "pool_name" {
-  
+
 }

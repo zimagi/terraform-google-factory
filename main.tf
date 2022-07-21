@@ -29,6 +29,7 @@ module "bootstrap_seed" {
     "servicenetworking.googleapis.com",
     "cloudkms.googleapis.com",
     "compute.googleapis.com",
+    "container.googleapis.com",
     "logging.googleapis.com",
     "bigquery.googleapis.com",
     "cloudresourcemanager.googleapis.com",

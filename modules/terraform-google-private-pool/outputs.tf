@@ -17,3 +17,7 @@ output "network_id" {
 output "network_self_link" {
   value = google_compute_network.default.self_link
 }
+
+output "vpc_cidr" {
+  value = "${var.global_address}/${var.global_address_prefix_length}"
+}

@@ -15,11 +15,11 @@ module "bootstrap_seed" {
   default_region = var.default_region
   random_suffix  = var.enable_random_suffix
 
-  billing_account                            = var.billing_account
-  group_org_admins                           = var.group_org_admins
-  group_billing_admins                       = var.group_billing_admins
-  users_org_admins                           = var.users_org_admins
-  org_project_creators                       = var.extra_org_project_creators
+  billing_account      = var.billing_account
+  group_org_admins     = var.group_org_admins
+  group_billing_admins = var.group_billing_admins
+  users_org_admins     = var.users_org_admins
+  org_project_creators = var.extra_org_project_creators
 
   sa_enable_impersonation                    = var.sa_enable_impersonation
   enable_cross_project_service_account_usage = var.enable_cross_project_service_account_usage
@@ -84,9 +84,9 @@ module "bootstrap_seed" {
 module "bootstrap_build" {
   source = "./modules/terraform-google-bootstrap-cloudbuild"
 
-  org_id              = var.org_id
-  folder_id           = var.folder_id
-  billing_account     = var.billing_account
+  org_id          = var.org_id
+  folder_id       = var.folder_id
+  billing_account = var.billing_account
   # group_org_admins  = var.group_org_admins
 
   sa_enable_impersonation                    = var.sa_enable_impersonation
@@ -197,8 +197,8 @@ module "vpc" {
     module.zimagi_projects
   ]
   for_each = var.zimagi_projects
-  source  = "terraform-google-modules/network/google"
-  version = "5.0.0"
+  source   = "terraform-google-modules/network/google"
+  version  = "5.0.0"
 
   project_id   = module.zimagi_projects[each.key].project_id
   network_name = "${var.project_prefix}-gke"
@@ -211,7 +211,7 @@ module "vpc" {
   subnets = [
     {
       subnet_name   = "gke"
-      subnet_ip     = "10.0.0.0/17"
+      subnet_ip     = "10.244.252.0/22"
       subnet_region = var.default_region
     },
   ]
@@ -220,11 +220,11 @@ module "vpc" {
     gke = [
       {
         range_name    = "pods"
-        ip_cidr_range = "192.168.0.0/18"
+        ip_cidr_range = "10.4.0.0/14"
       },
       {
         range_name    = "services"
-        ip_cidr_range = "192.168.64.0/18"
+        ip_cidr_range = "10.0.32.0/20"
       },
     ]
   }
@@ -233,91 +233,111 @@ module "vpc" {
 module "worker_pool" {
   source = "./modules/terraform-google-private-pool"
 
-  project_id = data.google_project.cloudbuild.project_id
-  network_name = "${var.project_prefix}-${var.pool_name}"
-  global_address_name =  "${var.project_prefix}-${var.pool_name}"
-  pool_name = "${var.project_prefix}-${var.pool_name}"
-  pool_location = var.default_region
+  project_id          = data.google_project.cloudbuild.project_id
+  network_name        = "${var.project_prefix}-${var.pool_name}"
+  global_address_name = "${var.project_prefix}-${var.pool_name}"
+  pool_name           = "${var.project_prefix}-${var.pool_name}"
+  pool_location       = var.default_region
 }
 
-module "vpn_ha_build_to_gke" {
-  depends_on = [
-    module.vpc,
-    module.worker_pool
-  ]
-  source  = "terraform-google-modules/vpn/google//modules/vpn_ha"
-  version = "~> 1.3.0"
-  project_id  = data.google_project.cloudbuild.project_id
-  region  = var.default_region
-  network         = module.worker_pool.network_self_link
-  name            = "build-to-gke"
-  peer_gcp_gateway = module.vpn_ha_gke_to_build.self_link
-  router_asn = 64514
+module "vpn-ha-to-gke" {
+  source           = "terraform-google-modules/vpn/google//modules/vpn_ha"
+  version          = "2.3.0"
+  project_id       = data.google_project.cloudbuild.project_id
+  region           = var.default_region
+  network          = module.worker_pool.network_self_link
+  name             = "vpn-build-to-gke"
+  peer_gcp_gateway = module.vpn-ha-to-cloudbuild.self_link
+  router_asn       = 65001
   tunnels = {
     remote-0 = {
       bgp_peer = {
-        address = "169.254.1.1"
-        asn     = 64513
+        address = "169.254.0.2"
+        asn     = 65002
       }
-      bgp_peer_options  = null
-      bgp_session_range = "169.254.1.2/30"
-      ike_version       = 2
-      vpn_gateway_interface = 0
+      bgp_peer_options = {
+        advertise_groups = []
+        advertise_ip_ranges = {
+          "${module.worker_pool.vpc_cidr}" = "cidr"
+        }
+        advertise_mode = "CUSTOM"
+        route_priority = 100
+      }
+      bgp_session_range               = "169.254.0.1/30"
+      ike_version                     = 2
+      vpn_gateway_interface           = 0
       peer_external_gateway_interface = null
-      shared_secret     = ""
+      shared_secret                   = "secret"
     }
     remote-1 = {
       bgp_peer = {
-        address = "169.254.2.1"
-        asn     = 64513
+        address = "169.254.1.2"
+        asn     = 65002
       }
-      bgp_peer_options  = null
-      bgp_session_range = "169.254.2.2/30"
-      ike_version       = 2
-      vpn_gateway_interface = 1
+      bgp_peer_options = {
+        advertise_groups = []
+        advertise_ip_ranges = {
+          "${module.worker_pool.vpc_cidr}" = "cidr"
+        }
+        advertise_mode = "CUSTOM"
+        route_priority = 100
+      }
+      bgp_session_range               = "169.254.1.1/30"
+      ike_version                     = 2
+      vpn_gateway_interface           = 1
       peer_external_gateway_interface = null
-      shared_secret     = ""
+      shared_secret                   = "secret"
     }
   }
 }
 
-module "vpn_ha_gke_to_build" {
-  depends_on = [
-    module.vpc,
-    module.worker_pool
-  ]
-  source  = "terraform-google-modules/vpn/google//modules/vpn_ha"
-  version = "~> 1.3.0"
-  project_id  = module.zimagi_projects["development"].project_id
-  region  = var.default_region
-  network         = module.vpc["development"].network_self_link
-  name            = "gke-to-build"
-  router_asn = 64513
-  peer_gcp_gateway = module.vpn_ha_build_to_gke.self_link
+module "vpn-ha-to-cloudbuild" {
+  source           = "terraform-google-modules/vpn/google//modules/vpn_ha"
+  version          = "2.3.0"
+  project_id       = module.zimagi_projects["development"].project_id
+  region           = var.default_region
+  network          = module.vpc["development"].network_self_link
+  name             = "vpn-gke-to-build"
+  peer_gcp_gateway = module.vpn-ha-to-gke.self_link
+  router_asn       = 65002
   tunnels = {
     remote-0 = {
       bgp_peer = {
-        address = "169.254.1.2"
-        asn     = 64514
+        address = "169.254.0.1"
+        asn     = 65001
       }
-      bgp_peer_options  = null
-      bgp_session_range = "169.254.1.1/30"
-      ike_version       = 2
-      vpn_gateway_interface = 0
+      bgp_peer_options = {
+        advertise_groups = []
+        advertise_ip_ranges = {
+          "${var.master_ipv4_cidr_block}" = "cidr"
+        }
+        advertise_mode = "CUSTOM"
+        route_priority = 100
+      }
+      bgp_session_range               = "169.254.0.2/30"
+      ike_version                     = 2
+      vpn_gateway_interface           = 0
       peer_external_gateway_interface = null
-      shared_secret     = module.vpn_ha_build_to_gke.random_secret
+      shared_secret                   = "secret"
     }
     remote-1 = {
       bgp_peer = {
-        address = "169.254.2.2"
-        asn     = 64514
+        address = "169.254.1.1"
+        asn     = 65001
       }
-      bgp_peer_options  = null
-      bgp_session_range = "169.254.2.1/30"
-      ike_version       = 2
-      vpn_gateway_interface = 1
+      bgp_peer_options = {
+        advertise_groups = []
+        advertise_ip_ranges = {
+          "${var.master_ipv4_cidr_block}" = "cidr"
+        }
+        advertise_mode = "CUSTOM"
+        route_priority = 100
+      }
+      bgp_session_range               = "169.254.1.2/30"
+      ike_version                     = 2
+      vpn_gateway_interface           = 1
       peer_external_gateway_interface = null
-      shared_secret     = module.vpn_ha_build_to_gke.random_secret
+      shared_secret                   = "secret"
     }
   }
 }

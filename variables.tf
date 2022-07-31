@@ -186,12 +186,16 @@ variable "build_project_labels" {
   description = "Labels to apply to the project."
 }
 
+variable "master_ipv4_cidr_block" {
+  default = "172.16.0.0/28"
+}
+
 variable "zimagi_projects" {
   # type = map(string)
   default = {
     production = {
-      name           = "production"
-      activate_apis  = [
+      name = "production"
+      activate_apis = [
         "container.googleapis.com",
         "servicenetworking.googleapis.com",
         "cloudbuild.googleapis.com",
@@ -200,8 +204,8 @@ variable "zimagi_projects" {
       project_labels = {}
     }
     development = {
-      name           = "development"
-      activate_apis  = [
+      name = "development"
+      activate_apis = [
         "container.googleapis.com",
         "servicenetworking.googleapis.com",
         "cloudbuild.googleapis.com",

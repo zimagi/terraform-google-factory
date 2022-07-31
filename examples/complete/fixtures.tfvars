@@ -1,6 +1,6 @@
-org_id = "355066024952"
+org_id = "930952261607"
 
-billing_account = "01CE31-9B97BC-42BA8B"
+billing_account = "01C4D5-536C74-37B711"
 
 # group_org_admins = "org-admins@example.com"
 
@@ -8,18 +8,18 @@ billing_account = "01CE31-9B97BC-42BA8B"
 
 project_prefix = "zimagi"
 
-default_region = "europe-central2"
+default_region = "europe-west2"
 
-folder_id = "966146747762"
+folder_id = "590376611603"
 
-parent_folder = "966146747762"
+parent_folder = "590376611603"
 
 sa_enable_impersonation = true
 
-users_org_admin = []
-
 cloud_source_repos = [
-    "zimagi-gke"
+  "zimagi-gke"
 ]
 
 pool_name = "gke-pool"
+
+master_ipv4_cidr_block = "172.16.0.32/28"

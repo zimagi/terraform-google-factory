@@ -177,8 +177,8 @@ resource "google_cloudbuild_trigger" "develop_trigger" {
   service_account = var.terraform_sa_name
 
   trigger_template {
-    branch_name  = "develop"
-    repo_name    = each.value
+    branch_name = "develop"
+    repo_name   = each.value
   }
 
   substitutions = {

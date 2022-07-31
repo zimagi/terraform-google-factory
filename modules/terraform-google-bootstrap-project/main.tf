@@ -158,7 +158,7 @@ resource "google_service_account_iam_member" "org_admin_sa_user" {
 
   service_account_id = google_service_account.org_terraform.name
   role               = "roles/iam.serviceAccountUser"
-  member            = each.value
+  member             = each.value
 }
 
 resource "google_service_account_iam_member" "org_admin_sa_impersonate_permissions" {
@@ -166,22 +166,22 @@ resource "google_service_account_iam_member" "org_admin_sa_impersonate_permissio
 
   service_account_id = google_service_account.org_terraform.name
   role               = "roles/iam.serviceAccountTokenCreator"
-  member            = each.value
+  member             = each.value
 }
 
 resource "google_folder_iam_member" "org_admin_serviceusage_consumer" {
   for_each = toset(var.users_org_admins)
 
-  folder  = var.folder_id
-  role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = each.value
+  folder = var.folder_id
+  role   = "roles/serviceusage.serviceUsageConsumer"
+  member = each.value
 }
 
 resource "google_folder_iam_member" "org_admin_service_account_user" {
   for_each = toset(var.users_org_admins)
 
-  folder  = local.parent_id
-  role    = "roles/iam.serviceAccountUser"
+  folder = local.parent_id
+  role   = "roles/iam.serviceAccountUser"
   member = each.value
 }
 

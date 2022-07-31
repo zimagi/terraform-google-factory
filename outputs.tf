@@ -60,3 +60,31 @@ output "tf_runner_artifact_repo" {
   description = "GAR Repo created to store runner images"
   depends_on  = []
 }
+
+output "zimagi_project_ids" {
+  value = module.zimagi_projects
+}
+
+# output "tunnels_1" {
+#   value = module.vpn_ha_build_to_gke.tunnels
+#   sensitive = true
+
+# }
+
+# output "tunnels_2" {
+#   value = module.vpn_ha_gke_to_build.tunnels
+#   sensitive = true
+
+# }
+
+# output "tunnel_names_1" {
+#   value = module.vpn_ha_build_to_gke.tunnel_names
+#   sensitive = true
+
+# }
+
+# output "tunnel_names_2" {
+#   value = module.vpn_ha_gke_to_build.tunnel_names
+#   sensitive = true
+
+# }

@@ -190,19 +190,27 @@ variable "master_ipv4_cidr_block" {
   default = "172.16.0.0/28"
 }
 
+variable "vpn_shared_secret" {
+  default = "secret"
+}
+
+variable "bgp_session_range" {
+  default = "30"
+}
+
 variable "zimagi_projects" {
   # type = map(string)
   default = {
-    production = {
-      name = "production"
-      activate_apis = [
-        "container.googleapis.com",
-        "servicenetworking.googleapis.com",
-        "cloudbuild.googleapis.com",
-        "compute.googleapis.com"
-      ]
-      project_labels = {}
-    }
+    # production = {
+    #   name = "production"
+    #   activate_apis = [
+    #     "container.googleapis.com",
+    #     "servicenetworking.googleapis.com",
+    #     "cloudbuild.googleapis.com",
+    #     "compute.googleapis.com"
+    #   ]
+    #   project_labels = {}
+    # }
     development = {
       name = "development"
       activate_apis = [

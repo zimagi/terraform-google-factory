@@ -201,16 +201,16 @@ variable "bgp_session_range" {
 variable "zimagi_projects" {
   # type = map(string)
   default = {
-    # production = {
-    #   name = "production"
-    #   activate_apis = [
-    #     "container.googleapis.com",
-    #     "servicenetworking.googleapis.com",
-    #     "cloudbuild.googleapis.com",
-    #     "compute.googleapis.com"
-    #   ]
-    #   project_labels = {}
-    # }
+    production = {
+      name = "production"
+      activate_apis = [
+        "container.googleapis.com",
+        "servicenetworking.googleapis.com",
+        "cloudbuild.googleapis.com",
+        "compute.googleapis.com"
+      ]
+      project_labels = {}
+    }
     development = {
       name = "development"
       activate_apis = [

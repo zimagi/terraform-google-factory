@@ -287,6 +287,28 @@ module "vpn" {
   cloudbuild_vpc_cidr = module.worker_pool.vpc_cidr
 }
 
+resource "google_compute_router" "router" {
+  for_each = var.zimagi_projects
+  project = module.zimagi_projects[each.key].project_id
+  name    = "nat-router"
+  network = module.vpc[each.key].network_name
+  region  = var.default_region
+}
+
+module "cloud-nat" {
+  depends_on = [
+    google_compute_router.router
+  ]
+  for_each = var.zimagi_projects
+  source     = "terraform-google-modules/cloud-nat/google"
+  version    = "2.2.1"
+  project_id = module.zimagi_projects[each.key].project_id
+  region     = var.default_region
+  router                             = google_compute_router.router[each.key].name
+  name                               = "nat-config"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
 # module "vpn-ha-to-gke" {
 #   source           = "terraform-google-modules/vpn/google//modules/vpn_ha"
 #   version          = "2.3.0"

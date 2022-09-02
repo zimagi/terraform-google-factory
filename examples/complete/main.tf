@@ -18,3 +18,7 @@ module "zimagi_factory" {
   enable_force_destroy    = true
   master_ipv4_cidr_block  = var.master_ipv4_cidr_block
 }
+
+output "vpn" {
+  value = module.zimagi_factory.vpn
+}

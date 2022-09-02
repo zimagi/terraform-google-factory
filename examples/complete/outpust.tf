@@ -36,3 +36,7 @@ output "z" {
 output "g" {
   value = module.zimagi_factory.gcs_bucket_tfstate
 }
+
+output "n" {
+  value = module.zimagi_factory.wp_network_self_lunk
+}

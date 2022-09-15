@@ -12,3 +12,4 @@ master_authorized_networks = [
         display_name = "VPN"
     }
 ]
+release_channel = "UNSPECIFIED"

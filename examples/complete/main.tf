@@ -17,8 +17,5 @@ module "zimagi_factory" {
   pool_name               = var.pool_name
   enable_force_destroy    = true
   master_ipv4_cidr_block  = var.master_ipv4_cidr_block
-}
-
-output "vpn" {
-  value = module.zimagi_factory.vpn
+  kubernetes_cluster_name = var.kubernetes_cluster_name
 }

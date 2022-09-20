@@ -24,12 +24,12 @@ resource "google_service_networking_connection" "default" {
 resource "google_cloudbuild_worker_pool" "pool" {
   project = var.project_id
 
-  name          = var.pool_name
-  location      = var.pool_location
+  name     = var.pool_name
+  location = var.pool_location
 
   worker_config {
-    disk_size_gb = var.disk_size_gb
-    machine_type = var.machine_type
+    disk_size_gb   = var.disk_size_gb
+    machine_type   = var.machine_type
     no_external_ip = var.no_external_ip
   }
 
@@ -42,7 +42,7 @@ resource "null_resource" "update_peering" {
   depends_on = [google_service_networking_connection.default]
 
   provisioner "local-exec" {
-    command     = "gcloud compute networks peerings update servicenetworking-googleapis-com --network=${google_compute_network.default.name} --export-custom-routes --no-export-subnet-routes-with-public-ip --project ${var.project_id}"
-    on_failure  = fail
+    command    = "gcloud compute networks peerings update servicenetworking-googleapis-com --network=${google_compute_network.default.name} --export-custom-routes --no-export-subnet-routes-with-public-ip --project ${var.project_id}"
+    on_failure = fail
   }
 }

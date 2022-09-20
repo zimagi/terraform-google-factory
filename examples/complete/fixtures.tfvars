@@ -23,3 +23,5 @@ cloud_source_repos = [
 pool_name = "gke-pool"
 
 master_ipv4_cidr_block = "172.16.0.32/28"
+
+kubernetes_cluster_name = "zimagi"

@@ -242,177 +242,89 @@ module "worker_pool" {
 
 locals {
   vpn = { for index in range(length(var.zimagi_projects)) : keys(var.zimagi_projects)[index] => {
-    asn = 65000 + (2 * index) + 2
+    asn      = 65000 + (2 * index) + 2
     peer_asn = 65000 + (2 * index) + 1
     remote-0 = {
-        address = "169.254.${2 * index}.2"
-        remote_address = "169.254.${2 * index}.1"
+      address        = "169.254.${2 * index}.2"
+      remote_address = "169.254.${2 * index}.1"
     }
     remote-1 = {
-        address = "169.254.${2 * index +1}.2"
-        remote_address = "169.254.${2 * index +1}.1"
+      address        = "169.254.${2 * index + 1}.2"
+      remote_address = "169.254.${2 * index + 1}.1"
     }
   } }
 }
 
-output "wp_network_self_lunk" {
-  value = module.worker_pool.network_self_link
-}
-
 module "vpn" {
-  source = "./modules/terraform-google-vpn-ha"
-  for_each = var.zimagi_projects
-  region = var.default_region
-  gke_project_id = module.zimagi_projects[each.key].project_id
-  gke_network_self_link = module.vpc[each.key].network_self_link
-  gke_router_asn = local.vpn[each.key].asn
-  gke_0_peer_address = local.vpn[each.key]["remote-0"].remote_address
-  gke_0_peer_asn = local.vpn[each.key].peer_asn
-  gke_0_bgp_session_range = "${local.vpn[each.key]["remote-0"].address}/${var.bgp_session_range}"
-  gke_1_peer_address = local.vpn[each.key]["remote-1"].remote_address
-  gke_1_peer_asn = local.vpn[each.key].peer_asn
-  gke_1_bgp_session_range = "${local.vpn[each.key]["remote-1"].address}/${var.bgp_session_range}"
+  source                         = "./modules/terraform-google-vpn-ha"
+  for_each                       = var.zimagi_projects
+  region                         = var.default_region
+  gke_project_id                 = module.zimagi_projects[each.key].project_id
+  gke_network_self_link          = module.vpc[each.key].network_self_link
+  gke_router_asn                 = local.vpn[each.key].asn
+  gke_0_peer_address             = local.vpn[each.key]["remote-0"].remote_address
+  gke_0_peer_asn                 = local.vpn[each.key].peer_asn
+  gke_0_bgp_session_range        = "${local.vpn[each.key]["remote-0"].address}/${var.bgp_session_range}"
+  gke_1_peer_address             = local.vpn[each.key]["remote-1"].remote_address
+  gke_1_peer_asn                 = local.vpn[each.key].peer_asn
+  gke_1_bgp_session_range        = "${local.vpn[each.key]["remote-1"].address}/${var.bgp_session_range}"
   gke_cluster_control_plane_cidr = var.master_ipv4_cidr_block
 
 
-  cloudbuild_project_id = data.google_project.cloudbuild.project_id
-  cloudbuld_network_self_link = module.worker_pool.network_self_link
-  cloudbuild_router_asn = local.vpn[each.key].peer_asn
-  cloudbuild_0_peer_address = local.vpn[each.key]["remote-0"].address
-  cloudbuild_0_peer_asn = local.vpn[each.key].asn
+  cloudbuild_project_id          = data.google_project.cloudbuild.project_id
+  cloudbuld_network_self_link    = module.worker_pool.network_self_link
+  cloudbuild_router_asn          = local.vpn[each.key].peer_asn
+  cloudbuild_0_peer_address      = local.vpn[each.key]["remote-0"].address
+  cloudbuild_0_peer_asn          = local.vpn[each.key].asn
   cloudbuild_0_bgp_session_range = "${local.vpn[each.key]["remote-0"].remote_address}/${var.bgp_session_range}"
-  cloudbuild_1_peer_address = local.vpn[each.key]["remote-1"].address
-  cloudbuild_1_peer_asn = local.vpn[each.key].asn
+  cloudbuild_1_peer_address      = local.vpn[each.key]["remote-1"].address
+  cloudbuild_1_peer_asn          = local.vpn[each.key].asn
   cloudbuild_1_bgp_session_range = "${local.vpn[each.key]["remote-1"].remote_address}/${var.bgp_session_range}"
-  cloudbuild_vpc_cidr = module.worker_pool.vpc_cidr
+  cloudbuild_vpc_cidr            = module.worker_pool.vpc_cidr
 }
 
 resource "google_compute_router" "router" {
   for_each = var.zimagi_projects
-  project = module.zimagi_projects[each.key].project_id
-  name    = "nat-router"
-  network = module.vpc[each.key].network_name
-  region  = var.default_region
+  project  = module.zimagi_projects[each.key].project_id
+  name     = "nat-router"
+  network  = module.vpc[each.key].network_name
+  region   = var.default_region
 }
 
 module "cloud-nat" {
   depends_on = [
     google_compute_router.router
   ]
-  for_each = var.zimagi_projects
-  source     = "terraform-google-modules/cloud-nat/google"
-  version    = "2.2.1"
-  project_id = module.zimagi_projects[each.key].project_id
-  region     = var.default_region
+  for_each                           = var.zimagi_projects
+  source                             = "terraform-google-modules/cloud-nat/google"
+  version                            = "2.2.1"
+  project_id                         = module.zimagi_projects[each.key].project_id
+  region                             = var.default_region
   router                             = google_compute_router.router[each.key].name
   name                               = "nat-config"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
-# module "vpn-ha-to-gke" {
-#   source           = "terraform-google-modules/vpn/google//modules/vpn_ha"
-#   version          = "2.3.0"
-#   for_each         = var.zimagi_projects
-#   project_id       = data.google_project.cloudbuild.project_id
-#   region           = var.default_region
-#   network          = module.worker_pool.network_self_link
-#   name             = "build-to-${module.zimagi_projects[each.key].project_id}"
-#   peer_gcp_gateway = module.vpn-ha-to-cloudbuild[each.key].self_link
-#   router_asn       = local.vpn[each.key].peer_asn
-#   tunnels = {
-#     remote-0 = {
-#       bgp_peer = {
-#         address = local.vpn[each.key]["remote-0"].address
-#         asn     = local.vpn[each.key].asn
-#       }
-#       bgp_peer_options = {
-#         advertise_groups = []
-#         advertise_ip_ranges = {
-#           "${module.worker_pool.vpc_cidr}" = "cidr"
-#         }
-#         advertise_mode = "CUSTOM"
-#         route_priority = 100
-#       }
-#       bgp_session_range               = "${local.vpn[each.key]["remote-0"].remote_address}/${var.bgp_session_range}"
-#       ike_version                     = 2
-#       vpn_gateway_interface           = 0
-#       peer_external_gateway_interface = null
-#       shared_secret                   = var.vpn_shared_secret
-#     }
-#     remote-1 = {
-#       bgp_peer = {
-#         address = local.vpn[each.key]["remote-1"].address
-#         asn     = local.vpn[each.key].asn
-#       }
-#       bgp_peer_options = {
-#         advertise_groups = []
-#         advertise_ip_ranges = {
-#           "${module.worker_pool.vpc_cidr}" = "cidr"
-#         }
-#         advertise_mode = "CUSTOM"
-#         route_priority = 100
-#       }
-#       bgp_session_range               = "${local.vpn[each.key]["remote-1"].remote_address}/${var.bgp_session_range}"
-#       ike_version                     = 2
-#       vpn_gateway_interface           = 1
-#       peer_external_gateway_interface = null
-#       shared_secret                   = var.vpn_shared_secret
-#     }
-#   }
-# }
+locals {
+  projects = { for k, v in var.zimagi_projects : k => {
+    default_location      = var.default_region
+    env_project_id        = module.zimagi_projects[k].project_id
+    env_prefix            = var.project_prefix
+    env_environment       = k
+    env_name              = var.kubernetes_cluster_name
+    env_vpc_name          = module.vpc[k].network_name
+    env_subnetwork        = module.vpc[k].subnets_names[0]
+    env_subnet_ip         = var.master_ipv4_cidr_block
+    env_vpn_cidr_block    = module.worker_pool.vpc_cidr
+    backend_config_bucket = module.bootstrap_seed.gcs_bucket_tfstate
+    cluster_name          = "${var.project_prefix}-${k}-${var.kubernetes_cluster_name}"
+  } }
+}
 
-# module "vpn-ha-to-cloudbuild" {
-#   source           = "terraform-google-modules/vpn/google//modules/vpn_ha"
-#   version          = "2.3.0"
-#   for_each         = var.zimagi_projects
-#   project_id       = module.zimagi_projects[each.key].project_id
-#   region           = var.default_region
-#   network          = module.vpc[each.key].network_self_link
-#   name             = "${module.zimagi_projects[each.key].project_id}-to-build"
-#   peer_gcp_gateway = module.vpn-ha-to-gke[each.key].self_link
-#   router_asn       = local.vpn[each.key].asn
-#   tunnels = {
-#     remote-0 = {
-#       bgp_peer = {
-#         address = local.vpn[each.key]["remote-0"].remote_address
-#         asn     = local.vpn[each.key].peer_asn
-#       }
-#       bgp_peer_options = {
-#         advertise_groups = []
-#         advertise_ip_ranges = {
-#           "${var.master_ipv4_cidr_block}" = "cidr"
-#         }
-#         advertise_mode = "CUSTOM"
-#         route_priority = 100
-#       }
-#       bgp_session_range               = "${local.vpn[each.key]["remote-0"].address}/${var.bgp_session_range}"
-#       ike_version                     = 2
-#       vpn_gateway_interface           = 0
-#       peer_external_gateway_interface = null
-#       shared_secret                   = var.vpn_shared_secret
-#     }
-#     remote-1 = {
-#       bgp_peer = {
-#         address = local.vpn[each.key]["remote-1"].remote_address
-#         asn     = local.vpn[each.key].peer_asn
-#       }
-#       bgp_peer_options = {
-#         advertise_groups = []
-#         advertise_ip_ranges = {
-#           "${var.master_ipv4_cidr_block}" = "cidr"
-#         }
-#         advertise_mode = "CUSTOM"
-#         route_priority = 100
-#       }
-#       bgp_session_range               = "${local.vpn[each.key]["remote-1"].address}/${var.bgp_session_range}"
-#       ike_version                     = 2
-#       vpn_gateway_interface           = 1
-#       peer_external_gateway_interface = null
-#       shared_secret                   = var.vpn_shared_secret
-#     }
-#   }
-# }
+module "generate_zimagi_gke_repo" {
+  source = "./modules/terraform-local-file-repo"
 
-output "vpn" {
-  value = local.vpn
+  cloudbuild_project_id = module.bootstrap_build.cloudbuild_project_id
+  cloudbuild_region     = var.default_region
+  projects              = local.projects
 }

@@ -30,5 +30,9 @@ variable "pool_name" {
 }
 
 variable "master_ipv4_cidr_block" {
+
+}
+
+variable "kubernetes_cluster_name" {
   
 }

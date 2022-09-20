@@ -1,13 +1,13 @@
 variable "projects" {
-  
+
 }
 
 variable "cloudbuild_project_id" {
-  
+
 }
 
 variable "cloudbuild_region" {
-  
+
 }
 
 variable "zimagi_repo_name" {

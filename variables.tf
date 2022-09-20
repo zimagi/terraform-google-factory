@@ -211,7 +211,7 @@ variable "zimagi_projects" {
       ]
       project_labels = {}
     }
-    development = {
+    develop = {
       name = "development"
       activate_apis = [
         "container.googleapis.com",
@@ -223,6 +223,9 @@ variable "zimagi_projects" {
     }
   }
   description = "Zimagi Projects"
+}
+
+variable "kubernetes_cluster_name" {
 }
 
 variable "users_org_admins" {

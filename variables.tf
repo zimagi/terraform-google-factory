@@ -210,6 +210,7 @@ variable "zimagi_projects" {
         "compute.googleapis.com"
       ]
       project_labels = {}
+      enable_random_suffix = true
     }
     develop = {
       name = "development"
@@ -220,6 +221,7 @@ variable "zimagi_projects" {
         "compute.googleapis.com"
       ]
       project_labels = {}
+      enable_random_suffix = true
     }
   }
   description = "Zimagi Projects"

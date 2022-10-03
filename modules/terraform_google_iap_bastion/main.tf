@@ -1,6 +1,6 @@
 locals {
   bastion_name = format("%s-bastion", var.prefix)
-  bastion_zone = format("%s-a", var.region)
+  bastion_zone = format("%s-b", var.region)
 }
 
 data "template_file" "startup_script" {

@@ -13,7 +13,7 @@ variable "network" {
   description = "The name of the network being created to host the cluster in"
 }
 
-variable "subnet" {
+variable "subnet_name" {
   type        = string
   description = "The name of the subnet being created to host the cluster in"
 }

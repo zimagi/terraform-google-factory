@@ -1,4 +1,4 @@
-project_id = "zimagi-development-9c95"
+project_id = "zimagi-development-1de2"
 
 region = "europe-west2"
 
@@ -6,7 +6,7 @@ prefix = "eja"
 
 network = "zimagi-gke"
 
-subnet = "projects/zimagi-development-9c95/regions/europe-west2/subnetworks/gke"
+subnet_name = "gke"
 
 bastion_members = [
   "user:erik.jagyugya@dccs.tech"

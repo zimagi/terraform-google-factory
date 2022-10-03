@@ -6,6 +6,6 @@ module "iap_bastion" {
   region          = var.region
   prefix          = var.prefix
   network         = var.network
-  subnet          = var.subnet
+  subnet_name     = var.subnet_name
   bastion_members = var.bastion_members
 }

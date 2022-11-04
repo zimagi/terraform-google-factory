@@ -1,0 +1,10 @@
+steps:
+- name: "gcr.io/cloud-builders/kubectl"
+  args: ['get', 'svc', '-A']
+  env:
+  - 'CLOUDSDK_COMPUTE_REGION=europe-west2'
+  - 'CLOUDSDK_CORE_PROJECT=zimagi-development-541a'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=zimagi-develop-zimagi'
+options:
+  workerPool:
+    'projects/zimagi-cloudbuild-c716/locations/europe-west2/workerPools/zimagi-gke-pool'

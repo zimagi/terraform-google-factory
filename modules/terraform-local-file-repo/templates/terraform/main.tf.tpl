@@ -23,8 +23,7 @@ module "gke" {
   release_channel = var.release_channel
   enable_private_nodes = var.enable_private_nodes
   enable_private_endpoint = var.enable_private_endpoint
-  node_pools = {
-    zimagi_nodes = [
+  node_pools = [
       {
         name               = "default"
         machine_type       = "n2-standard-2"
@@ -62,7 +61,6 @@ module "gke" {
         initial_node_count = 0
       }
     ]
-  }
 }
 
 variable "project_id" {}

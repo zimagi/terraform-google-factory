@@ -34,6 +34,8 @@ locals {
     env_vpn_cidr_block    = module.worker_pool.vpc_cidr
     backend_config_bucket = module.bootstrap_seed.gcs_bucket_tfstate
     cluster_name          = "${var.project_prefix}-${k}-${var.kubernetes_cluster_name}"
+    enable_private_nodes = v.enable_private_nodes
+    enable_private_endpoint = v.enable_private_endpoint
   } }
 }
 

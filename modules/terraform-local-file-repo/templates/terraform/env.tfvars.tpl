@@ -13,3 +13,5 @@ master_authorized_networks = [
     }
 ]
 release_channel = "UNSPECIFIED"
+enable_private_endpoint = ${enable_private_endpoint}
+enable_private_nodes = ${enable_private_nodes}

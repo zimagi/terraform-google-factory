@@ -28,6 +28,8 @@ data "template_file" "terraform_env" {
     env_subnetwork     = "\"${each.value.env_subnetwork}\""
     env_subnet_ip      = "\"${each.value.env_subnet_ip}\""
     env_vpn_cidr_block = "\"${each.value.env_vpn_cidr_block}\""
+    enable_private_endpoint = "\"${each.value.enable_private_endpoint}\""
+    enable_private_nodes = "\"${each.value.enable_private_nodes}\""
   }
 }
 

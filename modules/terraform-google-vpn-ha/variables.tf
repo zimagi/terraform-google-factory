@@ -1,3 +1,9 @@
+variable "enabled" {
+  type        = bool
+  default     = false
+  description = "Set to false to prevent the module from creating any resources"
+}
+
 variable "gke_project_id" {
   description = "Production Project ID."
   type        = string

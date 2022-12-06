@@ -16,6 +16,8 @@ module "generate_zimagi_gke" {
       env_vpn_cidr_block    = "192.168.0.0/20"
       backend_config_bucket = "zimagi-tfstate-bf8b"
       cluster_name          = "zimagi-dev-develop"
+      enable_private_nodes  = false
+      enable_private_endpoint  = false
     }
     main = {
       default_location      = "europe-west2"
@@ -29,6 +31,8 @@ module "generate_zimagi_gke" {
       env_vpn_cidr_block    = "192.168.0.0/20"
       backend_config_bucket = "tfbucket"
       cluster_name          = "eja-prod-zimagi"
+      enable_private_nodes  = false
+      enable_private_endpoint  = false
     }
   }
 }

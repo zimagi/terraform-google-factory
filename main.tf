@@ -46,3 +46,9 @@ module "generate_zimagi_gke_repo" {
   cloudbuild_region     = var.default_region
   projects              = local.projects
 }
+
+resource "google_compute_global_address" "nginx_address" {
+  for_each = var.zimagi_projects
+  project  = module.zimagi_projects[each.key].project_id
+  name = "nginx-address"
+}

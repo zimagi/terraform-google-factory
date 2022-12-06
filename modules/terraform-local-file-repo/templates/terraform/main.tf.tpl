@@ -1,11 +1,37 @@
+## Provider block ##
+
 provider "google" {
   project = var.project_id
   region  = var.region
 }
 
+provider "helm" {
+  kubernetes {
+    host  = "https://$${data.google_container_cluster.my_cluster.endpoint}"
+    token = data.google_client_config.provider.access_token
+    cluster_ca_certificate = base64decode(
+      data.google_container_cluster.my_cluster.master_auth[0].cluster_ca_certificate,
+    )
+  }
+}
+
+## Data block ##
+
+data "google_client_config" "provider" {}
+
+data "google_container_cluster" "my_cluster" {
+  name     = module.gke.cluster_name
+  location = var.region
+  project  = var.project_id
+}
+
+## State block ##
+
 terraform {
   backend "gcs" {}
 }
+
+## Resources block ##
 
 module "gke" {
   source = "git::https://github.com/zimagi/kubernetes-gke.git?ref=main"
@@ -63,8 +89,24 @@ module "gke" {
     ]
 }
 
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = "5.13.5"
+  namespace  = "argocd"
+  create_namespace = true
+  values = [
+    "$${file("argocd_values.yaml")}"
+  ]
+}
+
+## Variables block ##
+
 variable "project_id" {}
+
 variable "region" {}
+
 variable "prefix" {
   description = "prefix"
 }
@@ -100,3 +142,5 @@ variable "release_channel" {
 variable "enable_private_endpoint" {}
 
 variable "enable_private_nodes" {}
+
+## Outputs block ##

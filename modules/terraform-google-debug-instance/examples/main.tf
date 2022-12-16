@@ -3,10 +3,11 @@ data "google_compute_network" "default" {
   name    = var.network_name
 }
 
-resource "google_compute_address" "default" {
-  project = var.project_id
-  region  = var.region
-  name    = "ipv4-address"
+resource "google_compute_address" "nginx" {
+  for_each = var.zimagi_projects
+  project  = module.zimagi_projects[each.key].name
+  region   = var.region
+  name     = "ipv4-address"
 }
 
 resource "google_compute_subnetwork" "default" {

@@ -11,8 +11,8 @@ variable "zimagi_projects" {
       ]
       project_labels          = {}
       enable_random_suffix    = true
-      enable_private_endpoint = false
-      enable_private_nodes    = false
+      enable_private_endpoint = true
+      enable_private_nodes    = true
     }
     develop = {
       name = "development"

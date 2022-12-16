@@ -63,7 +63,7 @@ module "gke" {
         initial_node_count = 1
       },
       {
-        name               = "16x64"
+        name               = "high-memory"
         machine_type       = "n2-standard-16"
         min_count          = 0
         max_count          = 10
@@ -75,7 +75,7 @@ module "gke" {
         initial_node_count = 0
       },
       {
-        name               = "12x85-gpu"
+        name               = "gpu"
         machine_type       = "a2-highgpu-1g"
         min_count          = 0
         max_count          = 10
@@ -100,6 +100,23 @@ resource "helm_release" "argocd" {
     "$${file("argocd_values.yaml")}"
   ]
 }
+
+resource "helm_release" "argocd-apps" {
+  name       = "argocd-apps"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argocd-apps"
+  version    = "0.1.5"
+  namespace  = "argocd"
+  create_namespace = true
+  values = [
+    "$${file("argocd_apps_values.yaml")}"
+  ]
+
+  depends_on = [
+    helm_release.argocd
+  ]
+}
+
 
 ## Variables block ##
 

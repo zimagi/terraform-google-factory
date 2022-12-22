@@ -21,6 +21,10 @@ resource "google_service_networking_connection" "default" {
   reserved_peering_ranges = [google_compute_global_address.default.name]
 }
 
+resource "time_sleep" "wait_30_seconds" {
+  create_duration = "30s"
+}
+
 resource "google_cloudbuild_worker_pool" "pool" {
   project = var.project_id
 
@@ -36,6 +40,10 @@ resource "google_cloudbuild_worker_pool" "pool" {
   network_config {
     peered_network = google_compute_network.default.id
   }
+
+  depends_on = [
+    google_cloudbuild_worker_pool.pool
+  ]
 }
 
 resource "null_resource" "update_peering" {

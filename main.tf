@@ -36,11 +36,13 @@ locals {
     cluster_name            = "${var.project_prefix}-${k}-${var.kubernetes_cluster_name}"
     enable_private_nodes    = v.enable_private_nodes
     enable_private_endpoint = v.enable_private_endpoint
-    nginx_host_name         = "${google_compute_address.default[each.key].address}.nip.io"
+    nginx_host_name         = "${google_compute_global_address.nginx_address[k].address}.nip.io"
+    ip_address              = google_compute_global_address.nginx_address[k].address
     maintainer_email        = var.maintainer_email
     client_id               = var.client_id
     client_secret           = var.client_secret
   } }
+
 }
 
 module "generate_zimagi_gke_repo" {

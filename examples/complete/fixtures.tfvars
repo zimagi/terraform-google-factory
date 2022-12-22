@@ -10,6 +10,8 @@ client_id = "a"
 
 client_secret = "b"
 
+maintainer_email = "erik.jagyugya@dccs.tech"
+
 # Check it
 folder_id = "590376611603"
 

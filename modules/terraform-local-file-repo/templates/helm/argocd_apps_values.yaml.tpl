@@ -149,29 +149,29 @@ applications:
       helm:
         releaseName: "kibana"
         values: |
-            ingress:
-              enabled: true
-              className: "nginx"
-              annotations:
-                cert-manager.io/issuer-name: letsencrypt-prod
-                nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email"
-                nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
-                nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
-              pathtype: ImplementationSpecific
-              hosts:
-                - host: ${nginx_host_name}
-                  paths:
-                    - path: /kibana
-              tls:
-                - secretName: kibana-tls
-                  hosts:
-                    - ${nginx_host_name}
-            kibanaConfig:
-              kibana.yml: |
-                server.basePath: /kibana
-                server.rewriteBasePath: true
-                xpack.security.enabled: false
-            healthCheckPath: /kibana
+          ingress:
+            enabled: true
+            className: "nginx"
+            annotations:
+              cert-manager.io/issuer-name: letsencrypt-prod
+              nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email"
+              nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+              nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+            pathtype: ImplementationSpecific
+            hosts:
+              - host: ${nginx_host_name}
+                paths:
+                  - path: /kibana
+            tls:
+              - secretName: kibana-tls
+                hosts:
+                  - ${nginx_host_name}
+          kibanaConfig:
+            kibana.yml: |
+              server.basePath: /kibana
+              server.rewriteBasePath: true
+              xpack.security.enabled: false
+          healthCheckPath: /kibana
         skipCrds: false
       extraSourceFields: {}
     destination:
@@ -253,7 +253,9 @@ applications:
       targetRevision: "9.3.21"
       helm:
         releaseName: "nginx-ingress-controller"
-        values: {}
+        values: |
+          service:
+            loadBalancerIP: ${ip_address}
         skipCrds: false
       extraSourceFields: {}
     destination:

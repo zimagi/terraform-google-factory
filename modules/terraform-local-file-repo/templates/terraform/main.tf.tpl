@@ -64,7 +64,7 @@ module "gke" {
       },
       {
         name               = "high-memory"
-        machine_type       = "n2-standard-16"
+        machine_type       = "n2-standard-2"
         min_count          = 0
         max_count          = 10
         disk_size_gb       = 10
@@ -76,7 +76,7 @@ module "gke" {
       },
       {
         name               = "gpu"
-        machine_type       = "a2-highgpu-1g"
+        machine_type       = "n2-standard-2"
         min_count          = 0
         max_count          = 10
         disk_size_gb       = 10

@@ -5,7 +5,7 @@ data "google_compute_network" "default" {
 
 resource "google_compute_address" "nginx" {
   for_each = var.zimagi_projects
-  project  = module.zimagi_projects[each.key].name
+  project  = module.zimagi_projects[each.key].project_id
   region   = var.region
   name     = "ipv4-address"
 }

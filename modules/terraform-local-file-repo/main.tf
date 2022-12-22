@@ -70,13 +70,17 @@ resource "local_file" "cloudbuild" {
 }
 
 data "template_file" "argocd_values" {
+  for_each = var.projects
   template = file("${local.helm_templates_path}/argocd_values.yaml.tpl")
-  vars     = {}
+  vars     = {
+    nginx_host_name  = "\"${each.value.nginx_host_name}\""
+  }
 }
 
 resource "local_file" "argocd_values" {
-  content  = data.template_file.argocd_values.rendered
-  filename = "${local.zimagi_repo}/argocd_values.yaml"
+  for_each = var.projects
+  content  = data.template_file.argocd_values[each.key].rendered
+  filename = "${local.zimagi_repo}/env/${each.key}_argocd_values.yaml"
 }
 
 data "template_file" "argocd_apps_values" {
@@ -84,6 +88,7 @@ data "template_file" "argocd_apps_values" {
   template = file("${local.helm_templates_path}/argocd_apps_values.yaml.tpl")
   vars = {
     nginx_host_name  = "\"${each.value.nginx_host_name}\""
+    ip_address       = "\"${each.value.ip_address}\""
     maintainer_email = "\"${each.value.maintainer_email}\""
     client_id        = "\"${each.value.client_id}\""
     client_secret    = "\"${each.value.client_secret}\""
@@ -91,6 +96,7 @@ data "template_file" "argocd_apps_values" {
 }
 
 resource "local_file" "argocd_apps_values" {
-  content  = data.template_file.argocd_apps_values.rendered
-  filename = "${local.zimagi_repo}/argocd_apps_values.yaml"
+  for_each = var.projects
+  content  = data.template_file.argocd_apps_values[each.key].rendered
+  filename = "${local.zimagi_repo}/env/${each.key}_argocd_apps_values.yaml"
 }
